@@ -1,35 +1,52 @@
-// import Image from "next/image";
+"use client";
+import Loader from "./loading";
+import supabase from "./api";
+import { useState, useEffect, forceUpdate } from "react";
 
 export default function Page() {
+  const [data, setData] = useState([]);
+
+  const updateData = async function (e) {
+    e.preventDefault();
+    const res = await supabase.from("notes").insert({
+      title: e.target[0].value,
+      text: e.target[1].value,
+    });
+  };
+
+  const requestData = async function () {
+    try {
+      const res = await supabase.from("notes").select();
+      if (res.error) throw new Error(res.error);
+      setData(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    requestData();
+  }, []);
+  console.log(data);
   return (
     <main className="flex min-h-screen items-center justify-evenly flex-row w-auto relative">
       <ul className="flex justify-center w-1/2 relative border-2 rounded p-16 aspect-video flex-wrap gap-14 h-auto overflow-y-auto">
-        <li className="flex-col border-2 p-3 justify-around w-1/4 h-max aspect-square hover:cursor-pointer">
-          <h1>This is a note</h1>
-          <p1 className="text-sm">Actual stuff</p1>
-        </li>
-        <li className="flex-col border-2 p-3 justify-around w-1/4 h-max aspect-square hover:cursor-pointer">
-          <h1>This is a note</h1>
-          <p1 className="text-sm">Actual stuff</p1>
-        </li>
-        <li className="flex-col border-2 p-3 justify-around w-1/4 h-max aspect-square hover:cursor-pointer">
-          <h1>This is a note</h1>
-          <p1 className="text-sm">Actual stuff</p1>
-        </li>
-        <li className="flex-col border-2 p-3 justify-around w-1/4 h-max aspect-square hover:cursor-pointer">
-          <h1>This is a note</h1>
-          <p1 className="text-sm">Actual stuff</p1>
-        </li>
-        <li className="flex-col border-2 p-3 justify-around w-1/4 h-max aspect-square hover:cursor-pointer">
-          <h1>This is a note</h1>
-          <p1 className="text-sm">Actual stuff</p1>
-        </li>
-        <li className="flex-col border-2 p-3 justify-around w-1/4 h-max aspect-square hover:cursor-pointer">
-          <h1>This is a note</h1>
-          <p1 className="text-sm">Actual stuff</p1>
-        </li>
+        {data.map((note) => {
+          return (
+            <li
+              className="flex-col border-2 p-3 justify-around w-1/4 h-max aspect-square hover:cursor-pointer "
+              key={note.id}
+            >
+              <h1 className="m-1">{note.title}</h1>
+              <p1 className="text-sm ">{note.text}</p1>
+            </li>
+          );
+        })}
       </ul>
-      <form className="flex flex-col gap-2 text-white justify-center items-center">
+      <form
+        className="flex flex-col gap-2 text-white justify-center items-center"
+        onSubmit={updateData}
+      >
         <input
           type="text"
           placeholder="Title"
