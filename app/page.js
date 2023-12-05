@@ -1,5 +1,6 @@
 "use client";
 import Loader from "./loading";
+import Error from "./error";
 import supabase from "./api";
 import { useState, useEffect, forceUpdate } from "react";
 
@@ -12,22 +13,26 @@ export default function Page() {
       title: e.target[0].value,
       text: e.target[1].value,
     });
+    requestData();
   };
 
   const requestData = async function () {
     try {
       const res = await supabase.from("notes").select();
       if (res.error) throw new Error(res.error);
+      console.log(data);
       setData(res.data);
     } catch (err) {
-      console.error(err);
+      setData("");
     }
   };
 
   useEffect(() => {
     requestData();
   }, []);
-  console.log(data);
+
+  if (!data) return <Error />;
+
   return (
     <main className="flex min-h-screen items-center justify-evenly flex-row w-auto relative">
       <ul className="flex justify-center w-1/2 relative border-2 rounded p-16 aspect-video flex-wrap gap-14 h-auto overflow-y-auto">
